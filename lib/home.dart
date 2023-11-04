@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sql_proj/database.dart';
+import 'package:sql_proj/model.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -24,7 +25,7 @@ class _HomeState extends State<Home> {
   }
 
   void _fetchData() async {
-    List<Map> results = await myDB.fecth();
+    List<Map> results = await myDB.fecthAll();
     print(results);
     setState(() {
       items = results;
@@ -126,7 +127,7 @@ class _HomeState extends State<Home> {
                     ),
                     items.isNotEmpty
                         ? FutureBuilder(
-                            future: myDB.fecth(),
+                            future: myDB.fecthAll(),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
@@ -257,7 +258,12 @@ class _HomeState extends State<Home> {
             ElevatedButton(
               onPressed: () {
                 //Insertion code
-                _insert(qName.text, int.parse(qAge.text));
+                Map<String, dynamic> row = {
+                  '_name': qName.text,
+                  '_age': int.parse(qAge.text)
+                };
+                Model modelo = Model.fromJson(row);
+                _insert(modelo);
 
                 //After insertion close the dialog
                 Navigator.pop(context);
@@ -403,8 +409,10 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void _insert(String name, int age) async {
-    myDB.insert(name, age);
+  void _insert(Model model) async {
+    setState(() {
+      myDB.insert(model);
+    });
   }
 
   void _select() {}

@@ -2,6 +2,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite/sqlite_api.dart';
+import 'package:sql_proj/model.dart';
 
 class DataBaseHelper {
   static const _databaseName = "myDataBase.db";
@@ -40,17 +41,16 @@ class DataBaseHelper {
     ''');
   }
 
-  void insert(String inputName, int inputAge) async {
-    _db.transaction((txn) async {
-      int insertId = await txn.rawInsert(
-          '''INSERT INTO $table($name, $age) VALUES(?, ?)''',
-          [inputName, inputAge]);
-      print('''Inserted: $insertId''');
-    });
+  void insert(Model row) async {
+    try {
+      _db.insert(table, row.toJson());
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   //Perform a select
-  Future<List<Map>> fecth() async {
+  Future<List<Map>> fecthAll() async {
     List<Map> list = await _db.rawQuery('''SELECT * FROM $table''');
     return list;
   }
@@ -61,6 +61,15 @@ class DataBaseHelper {
         [inputName, inputAge, inputId]);
     print('updated: $res');
   }
+  // void update(Model row) async {
+  //   int inputId = row.toJson()[id] as int;
+  //   await _db.update(
+  //     table,
+  //     row.toJson(),
+  //     where: '$id = ?',
+  //     whereArgs: [inputId],
+  //   );
+  // }
 
   void delete(int inputId) async {
     var count =
